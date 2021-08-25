@@ -2,6 +2,7 @@
 
 ## 为什么重写equals()方法就必须重写hashCode()方法?
 + equals()方法是用于比较对象引用是否指向同一块内存空间，对象重写equals()方法通常是为了在业务逻辑中比较对象值是否相同；hashcode()方法具有散列表能快速检索的特性，因此引入来提高程序运行的效率。在使用的时候，先比较两个对象的hashcode()方法返回值，如果不同，则不需要再使用equals()方法进行比较，如果相同，再使用equal()方法继续比较。这里需要保证一个原则，equals()方法返回false时，hashcode()方法返回值也一定不同（比如对于存储散列表的集合set（去重）来说，equal的两个对象是不能放入其中的，但是因为hashcode()值不同，会被保存进去，这样就会引起混乱），如何保证？------->重写hashcode()方法
+
 ## Object有哪些方法?
 **jdk1.5中部分方法如下：**
 + **getclass()方法**，返回一个对象的运行时类。该 Class 对象是由所表示类的 static synchronized 方法锁定的对象。
@@ -13,6 +14,7 @@
 + **notifyAll()方法**，唤醒在此对象监视器上等待的所有线程。线程通过调用其中一个 wait 方法，在对象的监视器上等待。直到当前的线程放弃此对象上的锁定，才能继续执行被唤醒的线程。被唤醒的线程将以常规方式与在该对象上主动同步的其他所有线程进行竞争；例如，唤醒的线程在作为锁定此对象的下一个线程方面没有可靠的特权或劣势。
 + **finalize()方法**，当垃圾回收器确定不存在对该对象的更多引用时，由对象的垃圾回收器调用此方法。子类重写 finalize 方法，以配置系统资源或执行其他清除。
 + **wait()方法**，导致当前的线程等待，直到其他线程调用此对象的 notify() 方法或 notifyAll() 方法，或者超过指定的时间量。当前的线程必须拥有此对象监视器。
+
 ## 接口和抽象类的区别，什么情况下用接口或抽象类?
 ### 区别
 + 抽象类是用来捕捉子类的通用特性的 。它不能被实例化，只能被用作子类的（父类）超类。抽象类是被用来创建继承层级里子类的模板。接口是抽象方法的集合。如果一个类实现了某个接口，那么它就继承了这个接口的抽象方法。这就像契约模式，如果实现了这个接口，那么就必须确保使用这些方法。接口只是一种形式，接口自身不能做任何事情。
@@ -21,8 +23,9 @@
 + 如果你拥有一些方法并且想让它们中的一些有*默认实现*，那么使用抽象类吧。
 + 如果你想*实现多重继承*，那么你必须使用接口。由于Java不支持多继承，子类不能够继承多个类，但可以实现多个接口。因此你就可以使用接口来解决它。
 + 如果基本功能在不断改变，那么就需要使用抽象类。如果不断改变基本功能并且使用接口，那么就需要改变所有实现了该接口的类。
+
 ## 为什么String设计成不可变？String 和 StringBuilder、StringBuffer 的区别？
-[参考链接](https://blog.csdn.net/huaye502/article/details/6603592)
+[Java中String，StringBuilder和StringBuffer的区别](https://blog.csdn.net/huaye502/article/details/6603592)
 ### 设计成不可变
 + 可变性：String类使用final关键字字符数组保存字符串，所以String的对象时不可变的。而StringBuilder与StringBuffer都继承自AbstractStringBuilder类，在AbstractStringBuilder中使用char[] value但是没有用final关键字修饰，所以这两种对象都是可变的。
 + 线程安全性：String的对象是不可变的，也就可以理解为常量，线程安全。AbstractStringBuilder是StringBuilder与StringBuffer的公共父类，定义了一些字符串的基本操作。StringBuffer对方法加了同步锁或者对调用方法加了同步锁，所以是线程安全的。StringBuilder并没有对方法进行同步锁，所以是非线程安全的。
@@ -31,27 +34,44 @@
   + 操作少量数据String
   + 单线程操作字符串缓冲区下操作大量数据=StringBuilder
   + 多线程操作字符串缓冲区下操作大量数据=StringBuffer
+
 ## 使用String s=new String(“abc”) 和 String s="abc" 的区别?
 `不要使用new String("some string") 方式构造字符串`
 + 要点说明:
 创建字符串时不要使用new String("some string")，此处会产生`2`个对象，在Java中，"some String"默认就已经创建了一个字符串，如果再用new String("some string")，将会创建出另外一个字符串，造成浪费。
 "abc"本身就是一个字符串对象，而在运行时执行String s = new String("abc")时，"abc"这个对象被复制一份到heap中，并且把heap中的对象引用交给s持有。这条语句创建了两个String对象。
+
 ## Arraylist、HashMap的初始容量、加载因子、扩容增量？
 + ArrayList()：可以构造一个**默认初始容量为10**的空列表，每次扩容后容量**增长50%**
 + HashMap()：构建一个**默认初始容量为 16**，**负载因子为 0.75**的 HashMap。
 + 当HashMap中的元素个数超过数组大小 $*$ loadFactor时，就会进行数组扩容，loadFactor的默认值为0.75，这是一个折中的取值。也就是说，默认情况下，数组大小为16，那么当HashMap中元素个数超过16 $*$ 0.75=12的时候，就把数组的大小扩展为 2 $*$ 16=32，即**扩大一倍**，然后重新计算每个元素在数组中的位置，而这是一个非常消耗性能的操作，所以如果我们已经预知HashMap中元素的个数，那么预设元素的个数能够有效的提高HashMap的性能。
+
 ## 有序的Map有哪些？为什么TreeMap是有序的？哪些集合是线程安全的？
 + 有序Map：Map主要用于存储健值对，根据键得到值，因此不允许键重复，但允许值重复。使用的时候key和value的数据类型可以相同。也可以不同。Map接口的主要实现类有HashMap（无序）、LinkedHashMap（有序）、TreeMap（有序，按照key的字典升序排序）、ConcurrentHashMap。
 + 为什么有序：TreeMap底层是基于红黑树实现的排序Map，为了进行排序，TreeMap要求放入的key必须实现Comparable接口，作为Value的对象则没有任何要求。如果作为key的类没有实现Comparable接口，必须在创建TreeMap时同时自定义Comparator比较器。
   + TreeMap的增删改查和统计相关的操作的时间复杂度都为 O(logn) 。由于实现了Map接口，则key的值不允许重复（重复则覆盖），也不允许为null，按照key的自然顺序排序或者Comparator接口指定的排序方法进行排序。value允许重复，也允许为null，当key重复时，会覆盖此value值。
   + TreeMap的特殊操作，如获取第一个key、更大的key、更小的key、key的子区间，优势较大。如果你需要得到一个有序的结果时就应该使用TreeMap（因为HashMap中元素的排列顺序是不固定的）。除此之外，由于HashMap在增删改查有更好的性能，所以大多不需要排序的时候我们会使用HashMap
-+ 线程安全的集合：Vector、statck、HashTable、Properties、concurrent包下面的类（如ConcurrentHashMap）线程安全。[参考链接](https://blog.csdn.net/mypersonalsong/article/details/83416393)
++ 线程安全的集合：Vector、statck、HashTable、Properties、concurrent包下面的类（如ConcurrentHashMap）线程安全。[并发系列（六）-----concurrent的简单介绍](https://blog.csdn.net/mypersonalsong/article/details/83416393)
+
 ## HashMap的底层数据结构，是如何插入的？哈希冲突解决方案？为什么是非线程安全的？
-+ JDK1.8之前HashMap底层是基于数组和链表结合在一起使用，也就是链表散列。HashCode经过扰动函数处理过后得到hash值，然后通过（n-1）&hash判断当前元素存放的位置（这里n指的是数组的长度），如果当前位置存在元素的话，就判断该元素与要存入的元素hash值以及key是否相等， 如果相同的话，直接覆盖，不同的话就通过拉链法解决冲突。所谓扰动函数就是HashMap中的hash方法。使用hash方法是为了防止一些实现比较差的hashCode()方法，换句话说使用扰动函数之后可以减少碰撞。相比于之前的版本，JDK1.8之后在解决哈希冲突时有了较大的变化，当链表大于阀值（默认为8）时，将链表转化为红黑树，以减少搜索时间
++ HashMap 底层是基于散列算法实现，散列算法分为**散列再探测和拉链式**。HashMap 则使用了拉链式的散列算法，并在 JDK 1.8 中引入了红黑树优化过长的链表。
++ 对于拉链式的散列算法，其数据结构是由数组和链表（或树形结构）组成。在进行增删查等操作时，首先要定位到元素的所在桶的位置，之后再从链表中定位该元素。比如我们要查询是否包含元素35，步骤如下：
+  + 定位元素35所处桶的位置，index = 35 % 16 = 3
+  + 在3号桶所指向的链表中继续查找，发现35在链表中。
++ 上面就是 HashMap 底层数据结构的原理，HashMap 基本操作就是对拉链式散列算法基本操作的一层包装。不同的地方在于 JDK 1.8 中引入了红黑树，底层数据结构由**数组+链表**变为了**数组+链表+红黑树**，不过本质并未变。
++ JDK1.8之前HashMap底层是基于数组和链表结合在一起使用，也就是链表散列。HashCode经过扰动函数处理过后得到hash值，然后通过（n-1）&hash判断当前元素存放的位置（这里n指的是数组的长度），如果当前位置存在元素的话，就判断该元素与要存入的元素hash值以及key是否相等， 如果相同的话，直接覆盖，不同的话就**通过拉链法解决冲突**。所谓扰动函数就是HashMap中的hash方法。使用hash方法是为了防止一些实现比较差的hashCode()方法，换句话说使用扰动函数之后可以减少碰撞。相比于之前的版本，**JDK1.8之后在解决哈希冲突时有了较大的变化，当链表大于阀值（默认为8）时，将链表转化为红黑树，以减少搜索时间**
++ [内部原文参考](http://3ms.huawei.com/km/blogs/details/5886749)
++ [JDK 源码中 HashMap 的 hash 方法原理是什么？- 知乎](https://www.zhihu.com/question/20733617)
++ [Java 8系列之重新认识HashMap - 美团技术博客](https://tech.meituan.com/java-hashmap.html)
++ [python内置的hash函数对于字符串来说，每次得到的值不一样？- 知乎](https://www.zhihu.com/question/57526436/answer/153262129)
++ [Java中HashMap关键字transient的疑惑 - segmentFault](https://segmentfault.com/q/1010000000630486)
+
 ## HashMap为什么初始容量总是2的n次方？
 + 对于任意给定的对象，只要它的 hashCode() 返回值相同，那么程序调用 hash(int h) 方法所计算得到的 hash 码值总是相同的。我们首先想到的就是把hash值对数组长度取模运算，这样一来，元素的分布相对来说是比较均匀的。但是，“模”运算的消耗还是比较大的。`当length总是 2 的n次方时，h& (length-1)运算等价于对length取模，也就是h%length，但是&比%具有更高的效率`，所以说，当数组长度为2的n次幂的时候，不同的key算得得index相同的几率较小，那么数据在数组上分布就比较均匀，也就是说碰撞的几率小，相对的，查询的时候就不用遍历某个位置上的链表，这样查询效率也就较高了。
 
 ## ConcurrentHashMap 和 Hashtable 的区别？
+
+
 ## synchronized的使用方式、底层实现以及JDK1.6的优化？
 ## 谈谈 synchronized和ReentrantLock 的区别？
 ## Java内存模型及volatile实现原理？
@@ -141,4 +161,3 @@ Web框架：Spring MVC、Spring Security、Spring Webflux（一般了解mvc即�
 分布式事务：TCC Transaction、Seata、Fesar（任选其一，主要了解实现思路）
 其他：Zuul、Hystrix、Redisson、Netty、Dubbo、Ribbon、ES、HBase
 常考的已加粗，重点阅读总结。
-
